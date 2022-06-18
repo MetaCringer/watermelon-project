@@ -1,40 +1,8 @@
 version: "3"
 services:
-  master:
-    build: master
-    ports:
-    - "25565:25565"
-    volumes:
-      - vmaster:/pv/
-  slave0:
-    build: slave
-    environment:
-      - server_name=slave0
-      - velocity_secret=F5Uotbw4tlIl
-    depends_on:
-    - master
-  slave1:
-    build: slave
-    environment:
-      - server_name=slave1
-      - velocity_secret=F5Uotbw4tlIl
-    depends_on:
-    - master
-
-  web:
-    image: nginx
-    volumes:
-    - ./nginx:/etc/nginx/templates
-    - wordpress:/var/www/wordpress
-    ports:
-    - "80:80"
-    environment:
-      NGINX_HOST: gnomes.pp.ua
-      WORDPRESS_HOST: wordpress
-      WORDPRESS_PORT: 9000
-      
+    
   wordpress:
-    image: wordpress:fpm
+    image: wordpress
     restart: always
     ports:
       - 9000:80
@@ -64,7 +32,6 @@ services:
     ports:
       - 9001:8080
 volumes:
-  vmaster:
   wordpress:
   db:
   
