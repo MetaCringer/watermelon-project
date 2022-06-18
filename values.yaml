@@ -1,0 +1,9 @@
+master:
+  image: metacringer/watermelon
+  tag: mc-master
+slave:
+  image: metacringer/watermelon
+  tag: mc-slave
+  replicas: 2
+velocity_secret: gdsfdsagqwads
+dockerconfigjson: watermelon-dcj

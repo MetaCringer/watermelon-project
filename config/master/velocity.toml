@@ -1,0 +1,58 @@
+config-version = "1.0"
+bind = "0.0.0.0:25565"
+motd = "&#09add3A Velocity Server"
+show-max-players = 500
+online-mode = false
+prevent-client-proxy-connections = false
+player-info-forwarding-mode = "modern"
+forwarding-secret = "{{ .Values.velocity_secret }}"
+announce-forge = false
+kick-existing-players = false
+ping-passthrough = "DISABLED"
+
+enable-player-address-logging = true
+
+[servers]
+	{{range $i, $e := until (int .Values.slave.replicas)}}
+	mc-slave-{{$i}} = "mc-slave-{{$i}}:25565"
+	{{end}}
+	{{ $myList := list }} 
+	{{- range $i, $e := until (int .Values.slave.replicas) -}} {{- $myList = append $myList (printf "\"mc-slave-%d\"" $i ) -}} {{- end }}
+	try = [{{- join "," $myList -}}]
+	
+
+[forced-hosts]
+
+[advanced]
+
+	compression-threshold = 0
+
+	compression-level = -1
+
+	login-ratelimit = 3000
+
+	connection-timeout = 5000
+
+	read-timeout = 30000
+
+	haproxy-protocol = false
+
+	tcp-fast-open = false
+
+	bungee-plugin-message-channel = true
+
+	show-ping-requests = false
+
+	failover-on-unexpected-server-disconnect = true
+
+	announce-proxy-commands = true
+
+	log-command-executions = false
+
+	log-player-connections = true
+
+[query]
+	enabled = false
+	port = 25577
+	map = "Velocity"
+	show-plugins = false

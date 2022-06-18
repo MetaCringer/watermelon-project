@@ -1,0 +1,60 @@
+version: "3"
+services:
+  master:
+    build: master
+    ports:
+    - "25565:25565"
+    volumes:
+      - vmaster:/pv/
+  slave0:
+    build: slave
+    environment:
+      - server_name=slave0
+      - velocity_secret=F5Uotbw4tlIl
+    depends_on:
+    - master
+  slave1:
+    build: slave
+    environment:
+      - server_name=slave1
+      - velocity_secret=F5Uotbw4tlIl
+    depends_on:
+    - master
+
+
+
+  wordpress:
+    image: wordpress
+    restart: always
+    ports:
+      - 9000:80
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: exampleuser
+      WORDPRESS_DB_PASSWORD: examplepass
+      WORDPRESS_DB_NAME: exampledb
+      WORDPRESS_TABLE_PREFIX: melon
+    volumes:
+      - wordpress:/var/www/html
+
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: exampledb
+      MYSQL_USER: exampleuser
+      MYSQL_PASSWORD: examplepass
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+
+    volumes:
+      - db:/var/lib/mysql
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 9001:8080
+volumes:
+  vmaster:
+  wordpress:
+  db:
+  

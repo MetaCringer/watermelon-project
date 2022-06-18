@@ -1,0 +1,14 @@
+apiVersion: v2
+name: multipaper-chart
+version: 1.0.1
+kubeVersion: ">= 1.23.3"
+description: scalable minecraft server
+type: application
+keywords:
+  - minecraft
+home: The URL of this projects home page (optional)
+sources:
+  - A list of URLs to source code for this project (optional)
+maintainers: # (optional)
+  - name: metacringer
+    email: metacringer@gmail.com

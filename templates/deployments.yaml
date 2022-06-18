@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: mc-master
+  labels: 
+    app: mc-master
+spec: 
+  selector:
+    matchLabels:
+      app: mc-master
+  template:
+    metadata:
+      labels:
+        app: mc-master
+    spec:
+      securityContext:
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+      containers:
+      - name: master
+        image: {{ .Values.master.image }}:{{ .Values.master.tag }}
+        ports:
+        - containerPort: 25565
+          protocol: TCP
+        - containerPort: 35353
+          protocol: TCP
+        volumeMounts:
+        - name: config-volume
+          mountPath: "/app/velocity.toml"
+          subPath: "velocity.toml"
+        - name: pvc-master
+          mountPath: /pv
+        imagePullPolicy: Always
+        stdin: true
+        tty: true
+      imagePullSecrets:
+      - name: {{ .Values.dockerconfigjson }}
+      volumes:
+      - name: config-volume
+        configMap:
+          name: master-configmap
+      - name: pvc-master
+        persistentVolumeClaim:
+          claimName: pvc-master
+{{- $repl := ( int .Values.slave.replicas ) -}}
+{{- $slaveimg := tpl "{{ .Values.slave.image }}:{{ .Values.slave.tag }}" . -}}
+{{- $dcj := .Values.dockerconfigjson -}}
+{{ $currentScope := . }}
+{{range $i, $e := until $repl }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: mc-slave-{{$i}}
+  labels: 
+    app: mc-slave-{{$i}}
+spec: 
+  selector:
+    matchLabels:
+      app: mc-slave-{{$i}}
+  template:
+    metadata:
+      labels:
+        app: mc-slave-{{$i}}
+    spec:
+      securityContext:
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+      containers:
+      - name: slave
+        image: "{{ $slaveimg }}"
+        ports:
+        - containerPort: 25565
+          protocol: TCP
+        volumeMounts:
+{{- with $currentScope }}
+{{- range $path, $_ :=  .Files.Glob  "config/slave/*" }}
+        - name: config-volume
+          mountPath: "/app/{{ base $path }}"
+          subPath: "{{ base $path }}"
+{{- end -}}
+{{ end }}
+        env:
+        - name: server_name
+          value: mc-slave-{{$i}}
+        - name: master_address
+          value: mc-master
+        - name: velocity_secret
+          value: {{ $currentScope.Values.velocity_secret }}
+        imagePullPolicy: Always
+        stdin: true
+        tty: true
+      imagePullSecrets:
+      - name: {{ $dcj }}
+      volumes:
+      - name: config-volume
+        configMap:
+          name: slave-configmap
+
+{{end}}
