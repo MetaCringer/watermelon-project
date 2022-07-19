@@ -1,0 +1,17 @@
+{
+  "bot_token": "${TELEGRAM_APIKEY}",
+  "bot_username": "${TELEGRAM_BOT_NAME}",
+  "disable_signup": false,
+  "user_role": "subscriber",
+  "redirect_to": "custom_url",
+  "redirect_url": "${TELEGRAM_REDIRECT}",
+  "avatar_meta_key": "wptg_login_avatar",
+  "random_email": true,
+  "button_style": "large",
+  "show_user_photo": true,
+  "corner_radius": "",
+  "show_if_user_is": "0",
+  "hide_on_default": false,
+  "show_message_on_error": true,
+  "custom_error_message": "Telegram is blocked by your\"s ISP"
+}

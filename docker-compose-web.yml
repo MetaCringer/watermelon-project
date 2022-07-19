@@ -1,20 +1,49 @@
 version: "3"
 services:
-    
+  launchserver:
+    build: launcher
+    tty: true
+    stdin_open: true
+    ports:
+    - 9274:9274
+    volumes:
+    - updates:/app/updates
+    - launcher-logs:/app/logs
+    - profiles:/app/profiles
+    - truststore:/app/truststore
+    - keys:/app/.keys
+    - launcher-shared:/app/shared
   wordpress:
     image: wordpress
     restart: always
     ports:
-      - 9000:80
+    - 9000:80
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: exampleuser
       WORDPRESS_DB_PASSWORD: examplepass
       WORDPRESS_DB_NAME: exampledb
-      WORDPRESS_TABLE_PREFIX: melon
     volumes:
-      - wordpress:/var/www/html
-
+    - wordpress:/var/www/html
+    depends_on:
+    - db
+  wp-init:
+    image: bozdoz/wordpress-initialize
+    restart: on-failure:20
+    env_file: wordpress/.env
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: exampleuser
+      WORDPRESS_DB_PASSWORD: examplepass
+      WORDPRESS_DB_NAME: exampledb
+    volumes: 
+    - wordpress:/var/www/html
+    - ./wordpress/initialize.sh:/app/initialize.sh
+    - ./wordpress/wp-telegram-config.json.template:/app/wp-telegram-config.json.template
+    - ./wordpress/launcher-patch.sql:/app/launcher-patch.sql
+    depends_on:
+    - db
+    - wordpress
   db:
     image: mysql:5.7
     restart: always
@@ -23,15 +52,20 @@ services:
       MYSQL_USER: exampleuser
       MYSQL_PASSWORD: examplepass
       MYSQL_RANDOM_ROOT_PASSWORD: '1'
-
     volumes:
-      - db:/var/lib/mysql
+    - db:/var/lib/mysql
   adminer:
     image: adminer
     restart: always
     ports:
       - 9001:8080
 volumes:
+  keys:
   wordpress:
   db:
+  updates:
+  launcher-logs:
+  profiles:
+  truststore:
+  launcher-shared:
   

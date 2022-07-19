@@ -1,52 +1,50 @@
 version: "3"
 services:
-  master:
-    build: master
+#web part
+  launchserver:
+    build: launcher
+    tty: true
+    stdin_open: true
     ports:
-    - "25565:25565"
+    - 9274:9274
     volumes:
-      - vmaster:/pv/
-  slave0:
-    build: slave
-    environment:
-      - server_name=slave0
-      - velocity_secret=F5Uotbw4tlIl
-    depends_on:
-    - master
-  slave1:
-    build: slave
-    environment:
-      - server_name=slave1
-      - velocity_secret=F5Uotbw4tlIl
-    depends_on:
-    - master
-
-  web:
-    image: nginx
-    volumes:
-    - ./nginx:/etc/nginx/templates
-    - wordpress:/var/www/wordpress
-    ports:
-    - "80:80"
-    environment:
-      NGINX_HOST: gnomes.pp.ua
-      WORDPRESS_HOST: wordpress
-      WORDPRESS_PORT: 9000
-      
+    - updates:/app/updates
+    - launcher-logs:/app/logs
+    - profiles:/app/profiles
+    - truststore:/app/truststore
+    - keys:/app/.keys
+    - launcher-shared:/app/shared
   wordpress:
-    image: wordpress:fpm
+    image: wordpress
     restart: always
     ports:
-      - 9000:80
+    - 9000:80
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: exampleuser
       WORDPRESS_DB_PASSWORD: examplepass
       WORDPRESS_DB_NAME: exampledb
-      WORDPRESS_TABLE_PREFIX: melon
     volumes:
-      - wordpress:/var/www/html
-
+    - wordpress:/var/www/html
+    depends_on:
+    - db
+  wp-init:
+    image: bozdoz/wordpress-initialize
+    restart: on-failure:20
+    env_file: wordpress/.env
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: exampleuser
+      WORDPRESS_DB_PASSWORD: examplepass
+      WORDPRESS_DB_NAME: exampledb
+    volumes: 
+    - wordpress:/var/www/html
+    - ./wordpress/initialize.sh:/app/initialize.sh
+    - ./wordpress/wp-telegram-config.json.template:/app/wp-telegram-config.json.template
+    - ./wordpress/launcher-patch.sql:/app/launcher-patch.sql
+    depends_on:
+    - db
+    - wordpress
   db:
     image: mysql:5.7
     restart: always
@@ -55,16 +53,65 @@ services:
       MYSQL_USER: exampleuser
       MYSQL_PASSWORD: examplepass
       MYSQL_RANDOM_ROOT_PASSWORD: '1'
-
     volumes:
-      - db:/var/lib/mysql
+    - db:/var/lib/mysql
   adminer:
     image: adminer
     restart: always
     ports:
       - 9001:8080
+
+#minecraft part
+
+  master:
+    build: master
+    ports:
+    - "25565:25565"
+#    environment:
+#    - DISABLE_LAUNCHER=true
+#    - VELOCITY_URL=https://api.papermc.io/v2/projects/velocity/versions/3.1.2-SNAPSHOT/builds/161/downloads/velocity-3.1.2-SNAPSHOT-161.jar
+    volumes:
+      - vmaster:/pv/
+#      - ./master/velocity.online-mode-false.toml:velocity.toml
+  slave0:
+    build: slave
+    ports:
+    - "25566:25565"
+    environment:
+      - server_name=slave0
+      - velocity_secret=F5Uotbw4tlIl
+      - AUTHLIB_URL=https://mirror.gravit.pro/compat/authlib/5.2.9/3/LauncherAuthlib3.jar
+      - LAUNCHER_PROFILE=1.18.2-fabric
+      - LAUNCHSERVER_WEB_SOKET=ws://launchserver:9274/api
+      - WAIT_DOWNLOADING_MINECRAFT_CACHE=40
+#      - ONLINE_MODE=false
+#      - DISABLE_LAUNCHER=true
+    volumes:
+    - launcher-shared:/app/shared
+    depends_on:
+    - master
+#  slave1:
+#    build: slave
+#    environment:
+#      - server_name=slave1
+#      - velocity_secret=F5Uotbw4tlIl
+#      - AUTHLIB_URL=https://mirror.gravit.pro/compat/authlib/5.2.9/3/LauncherAuthlib3.jar
+#      - LAUNCHER_PROFILE=1.18.2-fabric
+#      - LAUNCHSERVER_WEB_SOKET=ws://launchserver:9274/api
+#      - WAIT_DOWNLOADING_MINECRAFT_CACHE=40
+#      - ONLINE_MODE=false
+#    volumes:
+#    - launcher-shared:/app/shared
+#    depends_on:
+#    - master
 volumes:
   vmaster:
+  keys:
   wordpress:
   db:
+  updates:
+  launcher-logs:
+  profiles:
+  truststore:
+  launcher-shared:
   

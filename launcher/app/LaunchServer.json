@@ -1,0 +1,140 @@
+{
+    "projectName": "test",
+    "mirrors": [
+        "https://mirror.gravit.pro/5.2.x/",
+        "https://gravit-launcher-mirror.storage.googleapis.com/"
+    ],
+    "binaryName": "Launcher",
+    "copyBinaries": true,
+    "cacheUpdates": true,
+    "env": "STD",
+    "auth": {
+        "std": {
+        "core": {
+            "type": "mysql",
+            "mySQLHolder": {
+                "address": "db",
+                "port": 3306,
+                "username": "exampleuser",
+                "password": "examplepass",
+                "database": "exampledb",
+                "timezone": "UTC",
+                "useHikari": true
+            },
+            "passwordVerifier": {
+                "type": "phpass"
+            },
+            "expireSeconds": 3600,
+            "table": "wp_users",
+            "tableHwid": "hwids",
+            "uuidColumn": "uuid",
+            "usernameColumn": "user_login",
+            "passwordColumn": "user_pass",
+            "accessTokenColumn": "accessToken",
+            "hardwareIdColumn": "hwidId",
+            "serverIDColumn": "serverID"
+        },
+        "textureProvider": {
+            "skinURL": "http://localhost/skins/%username%.png",
+            "cloakURL": "http://localhost/cloaks/%username%.png",
+            "type": "request"
+        },
+        "isDefault": true,
+        "displayName": "Default"
+    }
+    },
+    "protectHandler": {
+      "profileWhitelist": {},
+      "allowUpdates": [],
+      "type": "std"
+    },
+    "components": {
+      "regLimiter": {
+        "message": "Превышен лимит регистраций",
+        "excludeIps": [],
+        "exclude": [],
+        "rateLimit": 3,
+        "rateLimitMillis": 36000000,
+        "type": "regLimiter"
+      },
+      "authLimiter": {
+        "message": "Превышен лимит авторизаций",
+        "exclude": [],
+        "rateLimit": 3,
+        "rateLimitMillis": 8000,
+        "type": "authLimiter"
+      },
+      "proguard": {
+        "modeAfter": "MainBuild",
+        "dir": "proguard",
+        "enabled": true,
+        "mappings": true,
+        "type": "proguard"
+      }
+    },
+    "launch4j": {
+      "enabled": true,
+      "setMaxVersion": false,
+      "maxVersion": "1.8.999",
+      "minVersion": "1.8.0",
+      "downloadUrl": "http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html",
+      "productName": "GravitLauncher",
+      "productVer": "5.2.12.12",
+      "fileDesc": "GravitLauncher 5.2.12",
+      "fileVer": "5.2.12.12",
+      "internalName": "Launcher",
+      "copyright": "© GravitLauncher Team",
+      "trademarks": "This product is licensed under GPLv3",
+      "txtFileVersion": "%s, build %d",
+      "txtProductVersion": "%s, build %d"
+    },
+    "netty": {
+      "fileServerEnabled": true,
+      "sendExceptionEnabled": false,
+      "ipForwarding": false,
+      "disableWebApiInterface": false,
+      "showHiddenFiles": false,
+      "launcherURL": "http://localhost:9274/Launcher.jar",
+      "downloadURL": "http://localhost:9274/%dirname%/",
+      "launcherEXEURL": "http://localhost:9274/Launcher.exe",
+      "address": "ws://localhost:9274/api",
+      "bindings": {},
+      "performance": {
+        "usingEpoll": true,
+        "bossThread": 2,
+        "workerThread": 8,
+        "schedulerThread": 2,
+        "sessionLifetimeMs": 86400000,
+        "maxWebSocketRequestBytes": 1048576
+      },
+      "binds": [
+        {
+          "address": "0.0.0.0",
+          "port": 9274
+        }
+      ],
+      "logLevel": "DEBUG"
+    },
+    "launcher": {
+      "guardType": "no",
+      "compress": true,
+      "stripLineNumbers": true,
+      "deleteTempFiles": true,
+      "certificatePinning": false,
+      "encryptRuntime": false,
+      "customJvmOptions": [],
+      "memoryLimit": 256
+    },
+    "sign": {
+      "enabled": false,
+      "keyStore": "pathToKey",
+      "keyStoreType": "JKS",
+      "keyStorePass": "mypass",
+      "keyAlias": "myname",
+      "keyPass": "mypass",
+      "metaInfKeyName": "SIGNUMO.RSA",
+      "metaInfSfName": "SIGNUMO.SF",
+      "signAlgo": "SHA256WITHRSA"
+    },
+    "startScript": "./start.sh"
+}
